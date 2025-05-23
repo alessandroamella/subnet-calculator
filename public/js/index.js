@@ -288,7 +288,9 @@ const getData = async () => {
     document.getElementById(
       "ok-hostrange"
     ).innerHTML = `${firstUsableHostAddress} &rarr; ${lastUsableHostAddress}`;
-    document.getElementById("ok-hostnumber").innerHTML = `${maxHosts} hosts`;
+    document.getElementById("ok-hostnumber").innerHTML = `${new Intl.NumberFormat("it-IT").format(
+      maxHosts
+    )} hosts`;
     document.getElementById("ok-broadcast").innerHTML = `${broadcastAddress}`;
     document.getElementById("ok-mask").innerHTML = `${mask}`;
 

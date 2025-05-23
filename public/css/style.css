@@ -58,8 +58,6 @@ body.dark-theme {
 }
 
 .theme-toggle {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1000;
+  float: right;
+  margin: 1rem;
 }
