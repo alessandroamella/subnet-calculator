@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "Subnet Calculator",
+  "short_name": "Subnet Calculator",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
