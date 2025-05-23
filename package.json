@@ -11,7 +11,7 @@
     "build:frontend": "pnpm run build:js && pnpm run build:css",
     "build:js": "esbuild public/js/index.js --bundle --minify --sourcemap --target=es2015 --outfile=public/js/index.min.js",
     "build:css": "esbuild public/css/style.css --bundle --minify --sourcemap --outfile=public/css/style.min.css",
-    "lint": "biome check --write ./src"
+    "lint": "biome check --write ./src ./index.html ./public"
   },
   "author": "Bitrey",
   "license": "ISC",
