@@ -11,17 +11,18 @@
   "author": "Bitrey",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "body-parser": "^1.20.3",
+    "dotenv": "^8.6.0",
+    "express": "^4.21.2",
     "morgan": "^1.10.0",
-    "winston": "^3.3.3"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.11",
-    "@types/morgan": "^1.9.2",
-    "@types/node": "^14.14.31",
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^4.17.22",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^14.18.63",
     "rimraf": "^3.0.2",
-    "typescript": "^4.2.2"
+    "typescript": "^4.9.5"
   }
 }
