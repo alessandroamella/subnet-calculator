@@ -109,24 +109,21 @@
                   type="number"
                   class="form-control"
                   id="host-number"
-                  placeholder="62"
+                  placeholder="e.g., 2 to 16,777,214"
                   min="0"
-                  max="254"
+                  max="16777214"
                 />
               </div>
             </div>
 
             <div class="col-12">
               <div class="input-group mt-2">
-                <div class="input-group-text">255.255.255.</div>
                 <input
                   aria-label="Subnet mask"
-                  type="number"
+                  type="text"
                   class="form-control"
                   id="subnet-mask"
-                  placeholder="192"
-                  min="0"
-                  max="252"
+                  placeholder="e.g., 255.255.255.192 or 255.0.0.0"
                 />
               </div>
             </div>
@@ -139,8 +136,8 @@
                   type="number"
                   class="form-control"
                   id="mask-slash"
-                  placeholder="26"
-                  min="24"
+                  placeholder="e.g., 8 to 30"
+                  min="8"
                   max="30"
                 />
               </div>
