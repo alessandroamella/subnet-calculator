@@ -1,79 +1,63 @@
+import path from "node:path";
+
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import express from "express";
+import { LoggerStream, logger } from "./logger";
 
 dotenv.config();
 
-import bodyParser from "body-parser";
-import express from "express";
-import path from "path";
-import { LoggerStream, logger } from "./logger";
-
-class Network {
-    // 192.168.0
-    baseIp: string;
-
-    // 0
-    startIp: number;
-
-    // 254
-    mask: number;
-
-    constructor(baseIp: string, startIp: number, mask: number) {
-        this.baseIp = baseIp;
-        this.startIp = startIp;
-        this.mask = mask;
-    }
-}
-
 class NetworkManager {
-    private _isNormalInteger(str: string): boolean {
+    private _isNormalInteger(str: string | number): boolean {
         if (typeof str === "number") str = (str as number).toString();
         var n = Math.floor(Number(str));
         return n !== Infinity && String(n) === str && n >= 0;
     }
 
-    isValidIp(ip: any): boolean {
+    private _validateNumberInput(
+        value: unknown,
+        min?: number,
+        max?: number
+    ): number | null {
+        if (!value) return null;
+        if (typeof value !== "string" && typeof value !== "number") return null;
+        if (!this._isNormalInteger(value)) return null;
+
+        const parsedValue = parseInt(value.toString());
+        if (Number.isNaN(parsedValue)) return null;
+
+        if (min !== undefined && parsedValue < min) return null;
+        if (max !== undefined && parsedValue > max) return null;
+
+        return parsedValue;
+    }
+
+    private _isValidMaskValue(value: number): boolean {
+        return [0, 128, 192, 224, 240, 248, 252].includes(value);
+    }
+
+    isValidIp(ip: unknown): boolean {
         if (!ip || typeof ip !== "string") return false;
         const dividedIp = ip.split(".");
         if (dividedIp.length !== 4) return false;
-        for (const ipPart of dividedIp) {
-            if (!this._isNormalInteger(ipPart)) return false;
-            const ipPartNum = parseInt(ipPart);
-            if (typeof ipPartNum !== "number") return false;
-            if (ipPartNum < 0 || ipPartNum > 255) return false;
-        }
-        return true;
+
+        return dividedIp.every((part) => {
+            const num = this._validateNumberInput(part, 0, 255);
+            return num !== null;
+        });
     }
 
-    isValidHostsNum(hosts: any): boolean {
-        if (!hosts) return false;
-        if (!this._isNormalInteger(hosts)) return false;
-        const parsedHosts = parseInt(hosts);
-        if (typeof parsedHosts !== "number") return false;
-        if (parsedHosts < 0 || parsedHosts > 254) return false;
-        return true;
+    isValidHostsNum(hosts: unknown): boolean {
+        return this._validateNumberInput(hosts, 0, 254) !== null;
     }
 
-    isValidMask(mask: any): boolean {
-        if (!mask) return false;
-        if (!this._isNormalInteger(mask)) return false;
-        const parsedMask = parseInt(mask);
-        if (Number.isNaN(parsedMask)) return false;
-        return (
-            parsedMask === 252 ||
-            parsedMask === 248 ||
-            parsedMask === 240 ||
-            parsedMask === 224 ||
-            parsedMask === 192 ||
-            parsedMask === 128 ||
-            parsedMask === 0
-        );
+    isValidMask(mask: unknown): boolean {
+        const parsedMask = this._validateNumberInput(mask);
+        return parsedMask !== null && this._isValidMaskValue(parsedMask);
     }
 
-    isValidSlash(slash: any): boolean {
-        if (!slash) return false;
-        if (!this._isNormalInteger(slash)) return false;
-        const parsedSlash = parseInt(slash);
-        return parsedSlash >= 24 && parsedSlash <= 30;
+    isValidSlash(slash: unknown): boolean {
+        return this._validateNumberInput(slash, 24, 30) !== null;
     }
 
     private _floorPowerOf2(n: number): number {
@@ -108,7 +92,7 @@ class NetworkManager {
     getHostsFromMask(mask: number): number {
         const binary = mask.toString(2).padStart(8, "0");
         const index = binary.split("0").length - 1;
-        return Math.pow(2, index) - 2;
+        return 2 ** index - 2;
     }
 
     static _reverseStr(str: string): string {
@@ -122,11 +106,11 @@ class NetworkManager {
     getFirstIp(ip: string, hosts: number): number {
         // 64
         const netLength = hosts + 2;
-        // logger.debug(`netLength = ${netLength}`);
+        logger.debug(`netLength = ${netLength}`);
 
         // 192.168.0.*100*
         const hostIp = this.getHostIp(ip);
-        // logger.debug(`hostIp = ${hostIp}`);
+        logger.debug(`hostIp = ${hostIp}`);
 
         let currentIp = 0;
         while (
@@ -176,7 +160,7 @@ app.use(bodyParser.json());
 
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
     res.sendFile(path.join(__dirname, "..", "index.html"));
 });
 
@@ -187,13 +171,15 @@ app.get("/valid-ip", (req, res) => {
 
 app.get("/valid-mask", (req, res) => {
     const { mask, hosts } = req.query;
-    if (networkManager.isValidMask(mask as any)) {
-        const newHosts = networkManager.getHostsFromMask(mask as any);
+    if (networkManager.isValidMask(mask as string)) {
+        const newHosts = networkManager.getHostsFromMask(
+            parseInt(mask as string)
+        );
         const slash = networkManager.getSlash(newHosts);
 
         const actualHosts =
-            networkManager.isValidHostsNum(hosts) &&
-            networkManager.isHostInRange(parseInt(hosts as any), newHosts)
+            networkManager.isValidHostsNum(hosts as string) &&
+            networkManager.isHostInRange(parseInt(hosts as string), newHosts)
                 ? hosts
                 : newHosts;
 
@@ -203,35 +189,35 @@ app.get("/valid-mask", (req, res) => {
 
 app.post("/", (req, res) => {
     const { ip, host } = req.body;
-    const hostsNum = parseInt(host as any);
-    if (!networkManager.isValidIp(ip))
+    const hostsNum = parseInt(host as string);
+    if (!networkManager.isValidIp(ip as string))
         return res.status(400).send("Invalid IP address");
-    else if (!networkManager.isValidHostsNum(host))
+    else if (!networkManager.isValidHostsNum(host as string))
         return res.status(400).send("Invalid host number");
 
-    // logger.debug(`IP: ${ip}`);
+    logger.debug(`IP: ${ip}`);
 
     const maxHosts = networkManager.getHostNumber(hostsNum);
-    // logger.debug(`Richiesti: ${maxHosts}`);
+    logger.debug(`Richiesti: ${maxHosts}`);
 
     const mask = networkManager.getMaskFromHosts(hostsNum);
     const slash = networkManager.getSlash(hostsNum);
-    // logger.debug(`Subnet: 255.255.255.${mask} /${slash}`);
+    logger.debug(`Subnet: 255.255.255.${mask} /${slash}`);
 
-    const baseIp = networkManager.getBaseIp(ip as any);
-    const firstIp = networkManager.getFirstIp(ip as any, maxHosts);
-    const lastIp = networkManager.getLastIp(ip as any, maxHosts);
-    // logger.debug(`IP range: ${baseIp}.${firstIp} - ${baseIp}.${lastIp}`);
+    const baseIp = networkManager.getBaseIp(ip as string);
+    const firstIp = networkManager.getFirstIp(ip as string, maxHosts);
+    const lastIp = networkManager.getLastIp(ip as string, maxHosts);
+    logger.debug(`IP range: ${baseIp}.${firstIp} - ${baseIp}.${lastIp}`);
 
     res.json({ baseIp, firstIp, lastIp, mask, slash, maxHosts });
 });
 
 app.get("/from-hosts", (req, res) => {
     let { hosts } = req.query;
-    if (!networkManager.isValidHostsNum(hosts)) {
+    if (!networkManager.isValidHostsNum(hosts as string)) {
         return res.status(400).send("Invalid host number");
     }
-    const parsedHosts = parseInt(hosts as any);
+    const parsedHosts = parseInt(hosts as string);
 
     const mask = networkManager.getMaskFromHosts(parsedHosts);
     const slash = networkManager.getSlash(parsedHosts);
@@ -241,17 +227,17 @@ app.get("/from-hosts", (req, res) => {
 
 app.get("/from-mask", (req, res) => {
     let { mask, hosts } = req.query;
-    if (!networkManager.isValidMask(mask)) {
+    if (!networkManager.isValidMask(mask as string)) {
         return res.status(400).send("Invalid subnet mask");
     }
-    const parsedMask = parseInt(mask as any);
+    const parsedMask = parseInt(mask as string);
 
     const newHosts = networkManager.getHostsFromMask(parsedMask);
     const slash = networkManager.getSlash(newHosts);
 
     const actualHosts =
-        networkManager.isValidHostsNum(hosts) &&
-        networkManager.isHostInRange(parseInt(hosts as any), newHosts)
+        networkManager.isValidHostsNum(hosts as string) &&
+        networkManager.isHostInRange(parseInt(hosts as string), newHosts)
             ? hosts
             : newHosts;
 
@@ -260,17 +246,17 @@ app.get("/from-mask", (req, res) => {
 
 app.get("/from-slash", (req, res) => {
     let { slash, hosts } = req.query;
-    if (!networkManager.isValidSlash(slash)) {
+    if (!networkManager.isValidSlash(slash as string)) {
         return res.status(400).send("Invalid slash notation");
     }
-    const parsedSlash = parseInt(slash as any);
+    const parsedSlash = parseInt(slash as string);
 
     const mask = networkManager.getMaskFromSlash(parsedSlash);
     const newHosts = networkManager.getHostsFromMask(mask);
 
     const actualHosts =
-        networkManager.isValidHostsNum(hosts) &&
-        networkManager.isHostInRange(parseInt(hosts as any), newHosts)
+        networkManager.isValidHostsNum(hosts as string) &&
+        networkManager.isHostInRange(parseInt(hosts as string), newHosts)
             ? hosts
             : newHosts;
 

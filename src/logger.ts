@@ -1,4 +1,6 @@
-import { transports, createLogger, format } from "winston";
+import path from "node:path";
+import { createLogger, format, transports } from "winston";
+
 const {
     combine,
     timestamp,
@@ -11,12 +13,10 @@ const {
     metadata
 } = format;
 
-import path from "path";
-
 const combinedLogsFile = path.join("./logs/combined.log");
 const errorsLogsFile = path.join("./logs/error.log");
 
-const errorStackFormat = format(info => {
+const errorStackFormat = format((info) => {
     if (info instanceof Error) {
         return Object.assign({}, info, {
             stack: info.stack,
@@ -26,8 +26,8 @@ const errorStackFormat = format(info => {
     return info;
 });
 
-const prettyJson = printf(info => {
-    if ((info.message as any).constructor === Object) {
+const prettyJson = printf((info) => {
+    if ((info.message as { constructor: unknown }).constructor === Object) {
         info.message = JSON.stringify(info.message, null, 4);
     }
     return `${info.level}: ${info.message}`;
@@ -47,7 +47,7 @@ export const logger = createLogger({
             format: combine(
                 colorize(),
                 printf(
-                    info =>
+                    (info) =>
                         `${info.timestamp} ${info.level} [${info.label}]: ${info.message}`
                 ),
                 errorStackFormat(),
@@ -56,6 +56,7 @@ export const logger = createLogger({
             )
         }),
         new transports.File({
+            level: "info",
             filename: combinedLogsFile,
             format: combine(
                 json(),
@@ -82,7 +83,7 @@ export const logger = createLogger({
 });
 
 export class LoggerStream {
-    write(message: string, encoding?: string) {
+    write(message: string) {
         logger.info(message);
     }
 }
