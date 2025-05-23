@@ -1,26 +1,26 @@
 module.exports = {
-    apps: [
-        {
-            name: "Subnet Calculator",
-            script: "npm",
-            args: "start",
-            instances: 1,
-            autorestart: true,
-            watch: false,
-            max_memory_restart: "1G",
-            env: {
-                NODE_ENV: "development",
-                IP: "127.0.0.1",
-                PORT: "2433"
-            },
-            env_production: {
-                NODE_ENV: "production",
-                IP: "127.0.0.1",
-                PORT: "2434"
-            }
-        }
-    ]
-    /*
+	apps: [
+		{
+			name: "Subnet Calculator",
+			script: "npm",
+			args: "start",
+			instances: 1,
+			autorestart: true,
+			watch: false,
+			max_memory_restart: "1G",
+			env: {
+				NODE_ENV: "development",
+				IP: "127.0.0.1",
+				PORT: "2433",
+			},
+			env_production: {
+				NODE_ENV: "production",
+				IP: "127.0.0.1",
+				PORT: "2434",
+			},
+		},
+	],
+	/*
   deploy : {
     production : {
       user : 'node',
