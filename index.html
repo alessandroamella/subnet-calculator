@@ -46,16 +46,43 @@
     <title>Subnet Calculator</title>
   </head>
   <body>
+    <!-- Theme Toggle Button -->
+    <button class="btn btn-outline-secondary theme-toggle" id="themeToggle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-moon-fill"
+        viewBox="0 0 16 16"
+        id="moonIcon"
+      >
+        <path
+          d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"
+        />
+      </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-sun-fill"
+        viewBox="0 0 16 16"
+        id="sunIcon"
+        style="display: none"
+      >
+        <path
+          d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"
+        />
+      </svg>
+    </button>
+
     <div class="container pt-3">
       <hr class="my-4" />
 
       <div class="jumbotron">
         <h1 class="display-4" style="font-weight: 600">Subnet calculator</h1>
-        <p class="lead">
-          Simple web tool to help you create subnets.<br />Made by Alessandro
-          Amella
-          <a target="_blank" href="https://www.bitrey.it">www.bitrey.it</a>
-        </p>
+        <p class="lead mb-1">Simple web tool to help you create subnets.</p>
       </div>
 
       <hr class="my-4" />
@@ -165,6 +192,26 @@
       </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer mt-auto py-2 bg-light">
+      <div class="container text-center">
+        <span class="text-muted">
+          © 2021-2025 Alessandro Amella |
+          <a target="_blank" href="https://www.bitrey.dev">www.bitrey.dev</a> |
+          <a
+            target="_blank"
+            href="https://github.com/alessandroamella/subnet-calculator"
+            >GitHub</a
+          >
+          | MIT License
+        </span>
+        <p class="small text-muted mt-2 mb-1">
+          Originally created during my time at ITIS Fermi high school to help me
+          and my classmates with subnetting exercises.
+        </p>
+      </div>
+    </footer>
+
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
@@ -181,5 +228,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js" integrity="sha384-KsvD1yqQ1/1+IA7gi3P0tyJcT3vR+NdBTt13hSJ2lnve8agRGXTTyNaBYmCR/Nwi" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js" integrity="sha384-nsg8ua9HAw1y0W1btsyWgBklPnCUAFLuTMS2G72MMONqmOymq585AcH49TLBQObG" crossorigin="anonymous"></script>
     -->
+
+    <script>
+      // Theme toggle functionality
+      const themeToggle = document.getElementById("themeToggle");
+      const moonIcon = document.getElementById("moonIcon");
+      const sunIcon = document.getElementById("sunIcon");
+
+      // Check for saved theme preference
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark-theme");
+        moonIcon.style.display = "none";
+        sunIcon.style.display = "inline-block";
+      }
+
+      themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark-theme");
+        const isDark = document.body.classList.contains("dark-theme");
+
+        // Toggle icons
+        moonIcon.style.display = isDark ? "none" : "inline-block";
+        sunIcon.style.display = isDark ? "inline-block" : "none";
+
+        // Save preference
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
+    </script>
   </body>
 </html>

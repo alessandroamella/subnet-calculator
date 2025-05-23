@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
+
 dotenv.config();
 
-import express from "express";
 import bodyParser from "body-parser";
+import express from "express";
 import path from "path";
-import { logger, LoggerStream } from "./logger";
+import { LoggerStream, logger } from "./logger";
 
 class Network {
     // 192.168.0
@@ -279,5 +280,5 @@ app.get("/from-slash", (req, res) => {
 const PORT = Number(process.env.PORT) || 3000;
 const IP = process.env.IP || "127.0.0.1";
 app.listen(PORT, IP, () => {
-    logger.info(`Subnet calculator server started on ${IP}:${PORT}`);
+    logger.info(`Subnet calculator server started on http://${IP}:${PORT}`);
 });
