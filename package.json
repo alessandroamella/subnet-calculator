@@ -14,7 +14,7 @@
     "lint": "biome check --write ./src ./index.html ./public"
   },
   "author": "Bitrey",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.20.3",
     "dotenv": "^8.6.0",
