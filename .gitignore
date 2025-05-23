@@ -3,4 +3,5 @@ node_modules/
 build/*
 logs/*
 public/js/index.min.js
-public/js/index.min.js.map
+public/css/style.min.css
+*.map
