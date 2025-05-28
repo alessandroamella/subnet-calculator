@@ -200,7 +200,7 @@ const slashWrong = () => {
 let isSlashError = true;
 slashElem.addEventListener("input", async () => {
   const n = Number.parseInt(slashElem.value);
-  if (isNormalInteger(slashElem.value) && n >= 8 && n <= 30) {
+  if (isNormalInteger(slashElem.value) && n >= 1 && n <= 30) {
     await getSubnet(hostsElem.value, null, slashElem.value);
     slashCorrect();
   } else slashWrong();

@@ -59,8 +59,8 @@ class NetworkManager {
   }
 
   isValidHostsNum(hosts: unknown): boolean {
-    // Max hosts for /8 is 2^24 - 2 = 16,777,214
-    return this._validateNumberInput(hosts, 1, 16777214) !== null;
+    // Max hosts for /1 is 2^31 - 2 = 2,147,483,646
+    return this._validateNumberInput(hosts, 1, 2147483646) !== null;
   }
 
   isValidMask(mask: unknown): boolean {
@@ -74,8 +74,8 @@ class NetworkManager {
   }
 
   isValidSlash(slash: unknown): boolean {
-    // Allow /8 to /30 for IPv4
-    return this._validateNumberInput(slash, 8, 30) !== null;
+    // Allow /1 to /30 for IPv4
+    return this._validateNumberInput(slash, 1, 30) !== null;
   }
 
   // Calculates the maximum number of hosts for a given number of requested hosts
@@ -94,7 +94,7 @@ class NetworkManager {
   getMaxHosts(requestedHosts: number): number {
     if (requestedHosts <= 0) return 0;
     const hostBits = Math.ceil(Math.log2(requestedHosts + 2));
-    if (hostBits > 24) return 16777214; // Max for /8
+    if (hostBits > 31) return 2 ** 31 - 2; // Max for /1 (31 host bits)
     if (hostBits < 2) return 2; // Min for /30
     return 2 ** hostBits - 2;
   }
