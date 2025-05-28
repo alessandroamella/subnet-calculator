@@ -133,7 +133,7 @@ const hostWrong = () => {
 let isHostError = true;
 hostsElem.addEventListener("input", async () => {
   const h = Number.parseInt(hostsElem.value);
-  if (isNormalInteger(hostsElem.value) && h > 0 && h <= 16777214) {
+  if (isNormalInteger(hostsElem.value) && h > 0 && h <= 2 ** 31 - 2) {
     await getSubnet(hostsElem.value, null, null);
     hostCorrect();
   } else hostWrong();

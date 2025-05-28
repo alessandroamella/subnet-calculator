@@ -9,26 +9,40 @@ import { LoggerStream, logger } from './logger';
 dotenv.config();
 
 class NetworkManager {
-  private _isNormalInteger(str: string | number): boolean {
-    const strValue = typeof str === 'number' ? str.toString() : str;
-    const n = Math.floor(Number(strValue));
-    return n !== Number.POSITIVE_INFINITY && String(n) === strValue && n >= 0;
-  }
+  private maxHosts = 2 ** 31 - 2;
 
   private _validateNumberInput(
     value: unknown,
     min?: number,
     max?: number,
   ): number | null {
-    if (!value) return null;
-    if (typeof value !== 'string' && typeof value !== 'number') return null;
-    if (!this._isNormalInteger(value)) return null;
+    if (value === null || value === undefined) {
+      return null;
+    }
 
-    const parsedValue = Number.parseInt(value.toString());
-    if (Number.isNaN(parsedValue)) return null;
+    const stringValue = String(value).trim();
+    if (stringValue === '') {
+      return null;
+    }
 
-    if (min !== undefined && parsedValue < min) return null;
-    if (max !== undefined && parsedValue > max) return null;
+    // Check if it's a string of digits. Allows "0", "1", "08", etc.
+    if (!/^\d+$/.test(stringValue)) {
+      return null;
+    }
+
+    const parsedValue = Number.parseInt(stringValue, 10);
+
+    // This NaN check should be redundant if /^\d+$/ passes, but good for safety.
+    if (Number.isNaN(parsedValue)) {
+      return null;
+    }
+
+    if (min !== undefined && parsedValue < min) {
+      return null;
+    }
+    if (max !== undefined && parsedValue > max) {
+      return null;
+    }
 
     return parsedValue;
   }
@@ -59,8 +73,7 @@ class NetworkManager {
   }
 
   isValidHostsNum(hosts: unknown): boolean {
-    // Max hosts for /1 is 2^31 - 2 = 2,147,483,646
-    return this._validateNumberInput(hosts, 1, 2147483646) !== null;
+    return this._validateNumberInput(hosts, 1, this.maxHosts) !== null;
   }
 
   isValidMask(mask: unknown): boolean {
@@ -94,13 +107,13 @@ class NetworkManager {
   getMaxHosts(requestedHosts: number): number {
     if (requestedHosts <= 0) return 0;
     const hostBits = Math.ceil(Math.log2(requestedHosts + 2));
-    if (hostBits > 31) return 2 ** 31 - 2; // Max for /1 (31 host bits)
+    if (hostBits > 31) return this.maxHosts;
     if (hostBits < 2) return 2; // Min for /30
     return 2 ** hostBits - 2;
   }
 
   getMaskFromSlash(slash: number): string {
-    if (slash < 8 || slash > 30) throw new Error('Invalid slash value');
+    if (slash < 1 || slash > 30) throw new Error('Invalid slash value');
     const maskLong = (0xffffffff << (32 - slash)) >>> 0;
     return this.longToIp(maskLong);
   }
